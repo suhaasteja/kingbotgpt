@@ -10,7 +10,9 @@ from streamlit.runtime.scriptrunner import get_script_run_ctx
 from streamlit_feedback import streamlit_feedback
 from llama_index.core.memory import ChatMemoryBuffer
 import toml
-
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 cbconfig = toml.load("cbconfig.toml")
 AVATARS = cbconfig['AVATARS']

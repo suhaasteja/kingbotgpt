@@ -5,4 +5,4 @@ llama-index-embeddings-openai
 llama-index-core 
 llama-index-llms-openai
 sqlalchemy
-sqlite3 >= 3.35.0.
+pysqlite3-binary
