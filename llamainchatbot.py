@@ -12,6 +12,7 @@ from streamlit.runtime.scriptrunner import get_script_run_ctx
 from streamlit_feedback import streamlit_feedback
 from llama_index.core.memory import ChatMemoryBuffer
 import toml
+import mysqlclient
 import chromadb
 
 cbconfig = toml.load("cbconfig.toml")
