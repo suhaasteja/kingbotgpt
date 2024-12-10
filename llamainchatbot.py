@@ -145,10 +145,10 @@ def queryBot(user_query,bot,chip=''):
                     query = user_query + ' - ' + chip
                 if st.session_state.reference:
                     reference = st.session_state.reference
-                s.execute(
-                    text('INSERT INTO chathistory VALUES (:ts, :today, :time, :sid, :q, :a, :fb, :gd, :bd, :rf);'), 
-                    params=dict(ts=current, today=today, time=now, sid=session_id, q=query, a=answer, fb='', gd='', bd='', rf='')) 
-                s.commit()
+                # s.execute(
+                    # text('INSERT INTO chathistory VALUES (:ts, :today, :time, :sid, :q, :a, :fb, :gd, :bd, :rf);'), 
+                    # params=dict(ts=current, today=today, time=now, sid=session_id, q=query, a=answer, fb='', gd='', bd='', rf='')) 
+                # s.commit()
         except Exception as e:
             st.error(e)
 
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     feedback_kwargs = {
         "feedback_type": "thumbs",
         "optional_text_label": "Optional. Please provide extra information",
-        "on_submit": saveFB,
+        #"on_submit": saveFB,
     }
                         
     if 'moment' in st.session_state:
