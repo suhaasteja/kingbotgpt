@@ -1,6 +1,6 @@
 streamlit
-streamlit-runtime-scriptrunner
-streamlit-feedback
+streamlit
+streamlit
 chromadb
 llama-index-vector-stores-chroma
 llama-index-embeddings-openai
