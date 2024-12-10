@@ -6,4 +6,4 @@ llama-index-vector-stores-chroma
 llama-index-embeddings-openai
 llama-index-core 
 llama-index-llms-openai
-sqlalchemy-sql
+sqlalchemy
