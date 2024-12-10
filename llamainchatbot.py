@@ -1,3 +1,6 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import VectorStoreIndex
@@ -9,9 +12,6 @@ from streamlit.runtime.scriptrunner import get_script_run_ctx
 from streamlit_feedback import streamlit_feedback
 from llama_index.core.memory import ChatMemoryBuffer
 import toml
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import chromadb
 
 cbconfig = toml.load("cbconfig.toml")
