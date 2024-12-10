@@ -6,4 +6,5 @@ llama-index-embeddings-openai
 llama-index-core 
 llama-index-llms-openai
 sqlalchemy
-pysqlite3-binary 
+pysqlite3-binary
+mysqlclient
