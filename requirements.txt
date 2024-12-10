@@ -7,4 +7,3 @@ llama-index-core
 llama-index-llms-openai
 sqlalchemy
 pysqlite3-binary
-mysqlclient
