@@ -1,0 +1,10 @@
+streamlit
+streamlit.runtime.scriptrunner
+streamlit_feedback
+chromadb
+llama_index.vector_stores.chroma
+llama_index.embeddings.openai
+llama_index.core 
+llama_index.llms.openai
+llmslama_index.core.memory
+sqlalchemy.sql
