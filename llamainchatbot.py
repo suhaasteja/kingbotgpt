@@ -47,11 +47,6 @@ p img{
 </style>
 """
 
-
-@st.cache_resource(ttl="1d")
-def getDSConnection():
-    return st.connection("mysqldb",autocommit=True)
-
 @st.cache_resource(ttl="1d", show_spinner=False)
 def getIndex():
     client = chromadb.PersistentClient(path=st.secrets.vectordb.DBPATH)
@@ -99,27 +94,6 @@ def getBot(memory):
     return chat_engine
 
 
-def saveFB(feedback, ts):
-    try:
-        conn = getDSConnection()
-        score = ''
-        comment = ''
-        timest = ts.replace('T', ' ')
-        if feedback['score']:
-            thumbs = (feedback['score']).strip()
-            score = {"👍": "good", "👎": "bad"}[thumbs]
-        if feedback['text']:
-            comment = (feedback['text']).strip()
-        with conn.session as s:
-            params = {'fb':comment, 'timest':timest}
-            clause = "UPDATE chathistory SET {0}=:fb WHERE timest=:timest".format(score)
-            s.execute(text(clause), params)
-            s.commit()
-    except Exception as e:
-        st.error(e)
-
-
-
 def queryBot(user_query,bot,chip=''):        
     current = datetime.datetime.now()
     st.session_state.moment = current.isoformat()
@@ -134,24 +108,6 @@ def queryBot(user_query,bot,chip=''):
             response = bot.chat(user_query)
             answer = response.response
             st.write(answer)
-
-        # Save QA to database
-        #try:
-        #    conn = getDSConnection()   
-        #    reference = ''                                
-        #    with conn.session as s:
-        #        query = user_query
-        #        if chip:
-        #            query = user_query + ' - ' + chip
-        #        if st.session_state.reference:
-        #            reference = st.session_state.reference
-        #        s.execute(
-        #            text('INSERT INTO chathistory VALUES (:ts, :today, :time, :sid, :q, :a, :fb, :gd, :bd, :rf);'), 
-        #            params=dict(ts=current, today=today, time=now, sid=session_id, q=query, a=answer, fb='', gd='', bd='', rf='')) 
-        #         s.commit()
-        # except Exception as e:
-        #    st.error(e)
-
 
 if __name__ == "__main__":    
 
@@ -226,7 +182,6 @@ if __name__ == "__main__":
     feedback_kwargs = {
         "feedback_type": "thumbs",
         "optional_text_label": "Optional. Please provide extra information",
-        #"on_submit": saveFB,
     }
                         
     if 'moment' in st.session_state:
