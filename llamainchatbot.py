@@ -1,6 +1,6 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# __import__('pysqlite3')
+# import sys
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import VectorStoreIndex
@@ -79,7 +79,7 @@ def getBot(memory):
         "10. If you don't know the answer, just say that you don't know, and refer users to the 'Ask A Librarian' URL: https://library.sjsu.edu/ask-librarian "
         "11. Do not provide book recommendations and refer the user to try their search on a library database"
         "12. Please end your response with a reference url from the source of the response content."
-        f"13. Today is {today}. Always use this information to answer time-sensitive questions about library hours or events. For library building hours and department hours, always refer to live data from library.sjsu.edu. If you cannot retrieve live data, inform the user to check Library Hours.\n"
+        "13. Today is {today}. Always use this information to answer time-sensitive questions about library hours or events. For library building hours and department hours, always refer to live data from library.sjsu.edu. If you cannot retrieve live data, inform the user to check Library Hours.\n"
         "14. When users ask about research or subject-specific topics first recommend OneSearch as a general tool for broad searches across multiple databases. Provide a hyperlink to OneSearch (https://csu-sjsu.primo.exlibrisgroup.com/discovery/search?vid=01CALS_SJO:01CALS_SJO&lang=en). Example: Try using our [OneSearch SJSU's Library Database](https://csu-sjsu.primo.exlibrisgroup.com/discovery/search?vid=01CALS_SJO:01CALS_SJO&lang=en) to explore a range of library resources. After suggesting OneSearch, recommend specific databases for specialized searches. For example, health topics like 'dementia' may include PubMed, CINAHL, or PsycINFO.\n"
         "{context}"
     )
@@ -189,7 +189,3 @@ if __name__ == "__main__":
         streamlit_feedback(
             **feedback_kwargs, args=(currents,), key=currents,
         )
-
-
-
-            
