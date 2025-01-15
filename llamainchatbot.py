@@ -49,7 +49,7 @@ p img{
 
 @st.cache_resource(ttl="1d", show_spinner=False)
 def getIndex():
-    client = chromadb.PersistentClient(path=st.secrets.vectordb.DBPATH)
+    client = chromadb.PersistentClient(path='./llamachromadb')
     embedding = OpenAIEmbedding(api_key=st.secrets.openai.key)
     collection = client.get_collection(name="sjsulib")
     cvstore = ChromaVectorStore(chroma_collection=collection)
