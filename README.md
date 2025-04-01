@@ -28,5 +28,10 @@ To make your own copy of KingbotGPT, you will need:
   
 ### Quick Start Steps
 1. Fork this repository on GitHub
-2. [Deploy your app on Streamlit Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app)
+2. [Deploy your app on Streamlit Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app). For the main file path, enter "llamainchatbot.py".
 3. Before running your app, add your OpenAI API key to the app's [secrets file](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management). The app expects the key as "openai.key". You can manage secrects in Streamlit's user interface. DO NOT create a secrets.toml file in your forked repository!
+
+That's it! From there, you can modify the chatbot prompt and other elements in the file llamainchatbot.py.
+
+## More Information
+You can read about the development of KingbotGPT in [Library-Led AI: Building a Library Chatbot as Service and Strategy](https://www.ala.org/sites/default/files/2025-03/Library-LedAI.pdf) in the ACRL 2025 Conference Proceedings. Please feel free to contact the Kingbot team at [kingbot@sjsu.edu](mailto:kingbot@sjsu.edu).
