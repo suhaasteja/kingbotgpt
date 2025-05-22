@@ -9,6 +9,3 @@ llama-index-llms-openai==0.3.2
 mysqlclient
 sqlalchemy
 pysqlite3-binary
-SQLAlchemy==2.0.36
-toml==0.10.2
-mysqlclient==2.2.6
