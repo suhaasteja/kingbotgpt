@@ -8,4 +8,4 @@ llama-index-core
 llama-index-llms-openai==0.3.2
 mysqlclient
 sqlalchemy
-pysqlite3-binary >= 3.35.0
+pysqlite3-binary
