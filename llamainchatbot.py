@@ -162,6 +162,14 @@ if __name__ == "__main__":
     # Initialize processed flag to prevent duplicate processing
     if 'processed' not in st.session_state:
         st.session_state.processed = False
+    
+    # Initialize processing flag to disable input during bot response
+    if 'is_processing' not in st.session_state:
+        st.session_state.is_processing = False
+    
+    # Initialize pending query
+    if 'pending_query' not in st.session_state:
+        st.session_state.pending_query = None
 
     # Initialize conversation started flag
     if 'conversation_started' not in st.session_state:
@@ -186,36 +194,41 @@ if __name__ == "__main__":
         role_key = "user" if msg.role == MessageRole.USER else "assistant"
         st.chat_message(role_key, avatar=AVATARS[role_key]).write(msg.content)
 
-    # Handle button clicks
-    if button1 and not st.session_state.processed:
-        st.session_state.conversation_started = True
-        user_input = cbconfig['button1']['content']
-        st.chat_message("user", avatar=AVATARS["user"]).write(user_input)
-        queryBot(user_input, bot)
-        st.session_state.processed = True
-        st.rerun()
+    # Handle button clicks with a helper function
+    def handle_button_click(button_config):
+        if not st.session_state.processed and not st.session_state.is_processing:
+            st.session_state.conversation_started = True
+            st.session_state.is_processing = True
+            st.session_state.pending_query = button_config['content']
+            st.session_state.processed = True
+            st.rerun()
+    
+    if button1:
+        handle_button_click(cbconfig['button1'])
         
-    if button2 and not st.session_state.processed:
-        st.session_state.conversation_started = True
-        user_input = cbconfig['button2']['content']
-        st.chat_message("user", avatar=AVATARS["user"]).write(user_input)
-        queryBot(user_input, bot)
-        st.session_state.processed = True
-        st.rerun()
+    if button2:
+        handle_button_click(cbconfig['button2'])
         
-    if button3 and not st.session_state.processed:
-        st.session_state.conversation_started = True
-        user_input = cbconfig['button3']['content']
-        st.chat_message("user", avatar=AVATARS["user"]).write(user_input)
-        queryBot(user_input, bot)
-        st.session_state.processed = True
-        st.rerun()
+    if button3:
+        handle_button_click(cbconfig['button3'])
             
-    # Handle chat input
-    if user_query := st.chat_input(placeholder="Ask me about the SJSU Library!"):
+    # Handle chat input (disabled when processing)
+    if user_query := st.chat_input(
+        placeholder="Ask me about the SJSU Library!" if not st.session_state.is_processing else "Please wait...",
+        disabled=st.session_state.is_processing
+    ):
         st.session_state.conversation_started = True
-        st.chat_message("user", avatar=AVATARS["user"]).write(user_query)
-        queryBot(user_query, bot)
+        st.session_state.is_processing = True
+        st.session_state.pending_query = user_query
+        st.rerun()
+    
+    # Process pending query if exists
+    if 'pending_query' in st.session_state and st.session_state.pending_query:
+        query = st.session_state.pending_query
+        st.session_state.pending_query = None
+        st.chat_message("user", avatar=AVATARS["user"]).write(query)
+        queryBot(query, bot)
+        st.session_state.is_processing = False
         st.rerun()
     
     # Reset processed flag after buttons are no longer pressed
