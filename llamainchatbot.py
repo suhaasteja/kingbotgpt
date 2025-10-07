@@ -1,6 +1,6 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# __import__('pysqlite3')
+# import sys
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core import VectorStoreIndex
@@ -11,6 +11,7 @@ from sqlalchemy.sql import text
 from streamlit.runtime.scriptrunner import get_script_run_ctx
 from streamlit_feedback import streamlit_feedback
 from llama_index.core.memory import ChatMemoryBuffer
+from llama_index.core.llms import ChatMessage, MessageRole
 import toml
 import chromadb
 
@@ -94,20 +95,18 @@ def getBot(memory):
     return chat_engine
 
 
-def queryBot(user_query,bot,chip=''):        
+def queryBot(user_query, bot):        
     current = datetime.datetime.now()
     st.session_state.moment = current.isoformat()
-    session_id = st.session_state.session_id
-    today = current.date()
-    now = current.time()
-    answer = ''
     
-    st.chat_message("user", avatar=AVATARS["user"]).write(user_query)
-    with st.chat_message("assistant", avatar=AVATARS["assistant"]):  
+    # Show assistant avatar with spinner while loading
+    with st.chat_message("assistant", avatar=AVATARS["assistant"]):
         with st.spinner(text="In progress..."):
             response = bot.chat(user_query)
             answer = response.response
-            st.write(answer)
+        
+    return answer
+
 
 if __name__ == "__main__":    
 
@@ -119,10 +118,10 @@ if __name__ == "__main__":
     st.sidebar.markdown(cbconfig['side']['title'])
     st.sidebar.markdown(cbconfig['side']['intro'])
     st.sidebar.markdown("\n\n")
-    st.sidebar.link_button(cbconfig['side']['policylabel'],cbconfig['side']['policylink'])
+    st.sidebar.link_button(cbconfig['side']['policylabel'], cbconfig['side']['policylink'])
     
     # main
-    col1, col2, col3 = st.columns([0.25,0.1,0.65],vertical_alignment="bottom")
+    col1, col2, col3 = st.columns([0.25, 0.1, 0.65], vertical_alignment="bottom")
     with col2:
         st.markdown(cbconfig['main']['logo'])
     with col3:
@@ -132,24 +131,27 @@ if __name__ == "__main__":
   
     col21, col22, col23 = st.columns(3)
     with col21:
-        button1 = st.button(cbconfig['button1']['label'])
+        button1 = st.button(cbconfig['button1']['label'], key="btn1")
     with col22:
-        button2 = st.button(cbconfig['button2']['label'])    
+        button2 = st.button(cbconfig['button2']['label'], key="btn2")    
     with col23:
-        button3 = st.button(cbconfig['button3']['label'])    
+        button3 = st.button(cbconfig['button3']['label'], key="btn3")    
     
-    # lastest 5 messeges kept in memory for bot prompt
+    # Initialize memory for bot prompt (keeps latest 5 messages)
     if 'memory' not in st.session_state: 
         memory = ChatMemoryBuffer.from_defaults(token_limit=5000)
         st.session_state.memory = memory  
+        # Add initial message using ChatMessage
+        initial_msg = ChatMessage(role=MessageRole.ASSISTANT, content="Ask me a question about SJSU Library!")
+        memory.put(initial_msg)
     memory = st.session_state.memory
     
-    # get bot
+    # Initialize bot
     if 'mybot' not in st.session_state: 
         st.session_state.mybot = getBot(memory)  
     bot = st.session_state.mybot
 
-    # get streamlit session 
+    # Initialize streamlit session ID
     if 'session_id' not in st.session_state:
         session_id = get_script_run_ctx().session_id
         st.session_state.session_id = session_id
@@ -157,35 +159,78 @@ if __name__ == "__main__":
     if 'reference' not in st.session_state:
         st.session_state.reference = ''
 
-    # messeges kept in streamlit session for display
-    max_messages: int = 10  # Set the limit (K) of messages to keep
-    allmsgs = memory.get()
-    msgs = allmsgs[-max_messages:]
-                      
-    # display chat history
-    for msg in msgs:
-        st.chat_message(ROLES[msg.role],avatar=AVATARS[msg.role]).write(msg.content)
+    # Initialize processed flag to prevent duplicate processing
+    if 'processed' not in st.session_state:
+        st.session_state.processed = False
 
-    # chip 
-    if button1:
-        queryBot(cbconfig['button1']['content'],bot,cbconfig['button1']['chip'])
-    if button2:
-        queryBot(cbconfig['button2']['content'],bot,cbconfig['button2']['chip'])
-    if button3:
-        queryBot(cbconfig['button3']['content'],bot,cbconfig['button3']['chip'])
-            
-    # chat
-    if user_query := st.chat_input(placeholder="Ask me about the SJSU Library!"):
-        queryBot(user_query,bot)
+    # Initialize conversation started flag
+    if 'conversation_started' not in st.session_state:
+        st.session_state.conversation_started = False
+
+    # Display chat history FIRST (last 10 messages)
+    max_messages = 10
+    allmsgs = memory.get()
+    
+    # Skip the initial greeting message if conversation has started
+    if st.session_state.conversation_started and len(allmsgs) > 1:
+        # If we have more than max_messages, show only the last max_messages (excluding first)
+        if len(allmsgs) > max_messages + 1:
+            msgs = allmsgs[-(max_messages):]
+        else:
+            msgs = allmsgs[1:]
+    else:
+        # Show initial greeting if no conversation yet
+        msgs = allmsgs[-max_messages:]
+    
+    for msg in msgs:
+        role_key = "user" if msg.role == MessageRole.USER else "assistant"
+        st.chat_message(role_key, avatar=AVATARS[role_key]).write(msg.content)
+
+    # Handle button clicks
+    if button1 and not st.session_state.processed:
+        st.session_state.conversation_started = True
+        user_input = cbconfig['button1']['content']
+        st.chat_message("user", avatar=AVATARS["user"]).write(user_input)
+        queryBot(user_input, bot)
+        st.session_state.processed = True
+        st.rerun()
         
-    # feedback, works outside user_query section     
-    feedback_kwargs = {
-        "feedback_type": "thumbs",
-        "optional_text_label": "Optional. Please provide extra information",
-    }
-                        
+    if button2 and not st.session_state.processed:
+        st.session_state.conversation_started = True
+        user_input = cbconfig['button2']['content']
+        st.chat_message("user", avatar=AVATARS["user"]).write(user_input)
+        queryBot(user_input, bot)
+        st.session_state.processed = True
+        st.rerun()
+        
+    if button3 and not st.session_state.processed:
+        st.session_state.conversation_started = True
+        user_input = cbconfig['button3']['content']
+        st.chat_message("user", avatar=AVATARS["user"]).write(user_input)
+        queryBot(user_input, bot)
+        st.session_state.processed = True
+        st.rerun()
+            
+    # Handle chat input
+    if user_query := st.chat_input(placeholder="Ask me about the SJSU Library!"):
+        st.session_state.conversation_started = True
+        st.chat_message("user", avatar=AVATARS["user"]).write(user_query)
+        queryBot(user_query, bot)
+        st.rerun()
+    
+    # Reset processed flag after buttons are no longer pressed
+    if not (button1 or button2 or button3):
+        st.session_state.processed = False
+
+    # Feedback widget (only show if there's a recent interaction)
     if 'moment' in st.session_state:
+        feedback_kwargs = {
+            "feedback_type": "thumbs",
+            "optional_text_label": "Optional. Please provide extra information",
+        }
         currents = st.session_state.moment
         streamlit_feedback(
-            **feedback_kwargs, args=(currents,), key=currents,
+            **feedback_kwargs, 
+            args=(currents,), 
+            key=currents,
         )

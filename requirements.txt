@@ -6,6 +6,6 @@ llama-index-vector-stores-chroma
 llama-index-embeddings-openai==0.3.1
 llama-index-core
 llama-index-llms-openai==0.3.2
-mysqlclient
-sqlalchemy
-pysqlite3-binary
+# mysqlclient
+# sqlalchemy
+# pysqlite3-binary
